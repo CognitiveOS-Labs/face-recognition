@@ -1,9 +1,25 @@
 {
   "author": "jeanmachuca",
+  "brain": {
+    "wide_model": {
+      "base_model": "face-recognition",
+      "weights": {
+        "remote": {
+          "source": "huggingface",
+          "model_id": "CognitiveOS/vision",
+          "filename": "face_recognition_model.gguf",
+          "format": "gguf",
+          "quant": "f32",
+          "size_bytes": 22466400,
+          "sha256": "6d005d9ef7a00d2dbba286d7ebee196b8eb36403fc70d6650ab9b143120eea34"
+        }
+      }
+    }
+  },
   "checksum": {
     "sha256": ""
   },
-  "description": "Face recognition model weights (safetensors + gguf) converted from vladmandic/face-api, with a reproducible extraction/export/verification pipeline",
+  "description": "Face detection, recognition, landmarks, age/gender and expression with enrollment of known identities. Weights are declared as a remote Hugging Face model (CognitiveOS/vision) and downloaded at install time.",
   "hardware_requirements": {
     "min_ram_mb": 1024,
     "min_storage_mb": 200,
@@ -15,11 +31,18 @@
     "capabilities": [
       "face.detection",
       "face.recognition",
+      "face.enrollment",
       "face.landmarks",
       "face.expression",
       "face.age-gender"
     ],
-    "mcp_servers": [],
+    "mcp_servers": [
+      {
+        "name": "face-server",
+        "command": "mcp-face-server",
+        "transport": "stdio"
+      }
+    ],
     "system_prompt": "prompts/system.md",
     "tools_root": "tools"
   },

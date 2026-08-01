@@ -17,6 +17,23 @@ official TF.js blobs checked into the face-api repository at commit
 > PyTorch/Keras from the TS sources and wiring these tensors in is the
 > documented follow-up (see [Architecture reconstruction](#architecture-reconstruction)).
 
+## Package architecture
+
+This patch is one of two that share the converted weights:
+
+| Package | Role |
+|---------|------|
+| **`face-recognition`** (this repo) | Installs the pretrained weights (declared as a remote Hugging Face model) and exposes face **detection / recognition / enrollment** tools via an MCP server. |
+| **`face-recognition-tune`** | Companion patch implementing the `cpm tune` Controller Pattern — fine-tunes a **LoRA adapter** over the frozen base weights for domain adaptation. |
+
+The weights are hosted at **`https://huggingface.co/CognitiveOS/vision`** and
+declared in `cognitive.json` as `brain.wide_model.weights.remote`
+(`source: huggingface`, `model_id: CognitiveOS/vision`), so `cpm install`
+downloads the GGUF at install time and the daemon registers the model for
+`wide_model_load`. The recognition backbone is pretrained (VGGFace2); learning
+**who is who** happens through enrollment (embedding gallery), not retraining.
+
+
 ## Input models
 
 | Model | Manifest | Tensors | Use |
