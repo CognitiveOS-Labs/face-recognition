@@ -2,10 +2,6 @@
 .venv/
 __pycache__/
 
-# Local regeneration scratch (from tfjs-weights-to-gguf)
-artifacts/
-upstream/
-
 # Local build scratch
 out/
 
