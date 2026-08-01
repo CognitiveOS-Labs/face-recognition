@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""face-recognition MCP server (structural stub).
+
+Declares the tools exposed by the face-recognition cognitive patch and keeps
+the stdio protocol shape and error envelope stable.
+
+The actual CNN runtimes (detection, landmark alignment, embedding, and the
+enrollment gallery) are NOT implemented yet: they land in the
+architecture-reconstruction phase. Until then every tool call returns a
+structured E_INTERNAL error so consumers get a clear, parseable signal
+instead of a crash.
+
+Transport: stdio JSON-lines. See specs/mcp-conventions.md.
+"""
+
+import json
+import sys
+
+TOOLS = [
+    {
+        "name": "cognitiveos.face.detect",
+        "description": "Detect faces in an image and return bounding boxes and facial keypoints",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "path": {
+                    "type": "string",
+                    "description": "Absolute path to the image file"
+                }
+            },
+            "required": ["path"]
+        }
+    },
+    {
+        "name": "cognitiveos.face.embed",
+        "description": "Compute the 128-d face embedding for a detected, aligned face",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "image_path": {
+                    "type": "string",
+                    "description": "Absolute path to the image file"
+                },
+                "box": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "Face bounding box [x, y, w, h]; detected automatically when omitted"
+                }
+            },
+            "required": ["image_path"]
+        }
+    },
+    {
+        "name": "cognitiveos.face.enroll",
+        "description": "Enroll a labeled face into the identity gallery (embedding + label)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string",
+                    "description": "Identity label (e.g. a person's name)"
+                },
+                "image_path": {
+                    "type": "string",
+                    "description": "Absolute path to the image file"
+                }
+            },
+            "required": ["label", "image_path"]
+        }
+    },
+    {
+        "name": "cognitiveos.face.match",
+        "description": "Match a face against the enrolled gallery and return the closest identity",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "image_path": {
+                    "type": "string",
+                    "description": "Absolute path to the image file"
+                },
+                "threshold": {
+                    "type": "number",
+                    "description": "Cosine-distance threshold below which a match is accepted"
+                }
+            },
+            "required": ["image_path"]
+        }
+    },
+]
+
+
+def reply(obj):
+    sys.stdout.write(json.dumps(obj) + "\n")
+    sys.stdout.flush()
+
+
+def handle(message):
+    mtype = message.get("type") or message.get("method")
+    if mtype in ("initialize", "tools/list"):
+        reply({"tools": TOOLS})
+    elif mtype == "tools/call":
+        reply({
+            "isError": True,
+            "content": [{
+                "type": "text",
+                "text": "ERROR:E_INTERNAL:face server runtime not implemented yet (architecture-reconstruction phase)"
+            }]
+        })
+    elif mtype == "healthcheck":
+        reply({"type": "healthcheck_ok", "uptime_seconds": 0, "tools_healthy": True})
+    else:
+        reply({"status": "ok", "note": "unhandled message type"})
+        sys.stderr.write("unhandled: %s\n" % (mtype,))
+
+
+def main():
+    for line in sys.stdin:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            message = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        handle(message)
+
+
+if __name__ == "__main__":
+    main()

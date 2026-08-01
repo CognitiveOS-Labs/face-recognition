@@ -1,0 +1,54 @@
+{
+  "author": "jeanmachuca",
+  "brain": {
+    "wide_model": {
+      "base_model": "face-recognition",
+      "weights": {
+        "remote": {
+          "source": "huggingface",
+          "model_id": "CognitiveOS/vision",
+          "filename": "face_recognition_model.gguf",
+          "format": "gguf",
+          "quant": "f32",
+          "size_bytes": 22466400,
+          "sha256": "6d005d9ef7a00d2dbba286d7ebee196b8eb36403fc70d6650ab9b143120eea34"
+        }
+      }
+    }
+  },
+  "checksum": {
+    "sha256": ""
+  },
+  "description": "Face detection, recognition, landmarks, age/gender and expression with enrollment of known identities. Weights are declared as a remote Hugging Face model (CognitiveOS/vision) and downloaded at install time.",
+  "hardware_requirements": {
+    "min_ram_mb": 1024,
+    "min_storage_mb": 200,
+    "npu_required": false
+  },
+  "license": "MIT",
+  "name": "face-recognition",
+  "runtime": {
+    "capabilities": [
+      "face.detection",
+      "face.recognition",
+      "face.enrollment",
+      "face.landmarks",
+      "face.expression",
+      "face.age-gender"
+    ],
+    "mcp_servers": [
+      {
+        "name": "face-server",
+        "command": "mcp-face-server",
+        "transport": "stdio"
+      }
+    ],
+    "system_prompt": "prompts/system.md",
+    "tools_root": "tools"
+  },
+  "source": {
+    "issues": "https://github.com/CognitiveOS-Labs/face-recognition/issues",
+    "repository": "https://github.com/CognitiveOS-Labs/face-recognition"
+  },
+  "version": "0.1.0"
+}
