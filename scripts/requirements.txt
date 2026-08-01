@@ -1,7 +1,0 @@
-# Python dependencies for the face-recognition model conversion pipeline.
-# Install with:  python3 -m venv .venv && .venv/bin/pip install -r scripts/requirements.txt
-numpy>=2.0
-safetensors>=0.4
-# optional: external gguf reader used as a spec-compliance cross-check in
-# tests/gguf_external_check.py (pip package by ggml-org / llama.cpp ecosystem)
-gguf>=0.10
