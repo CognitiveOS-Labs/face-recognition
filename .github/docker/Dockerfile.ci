@@ -1,4 +1,10 @@
 ARG GO_VERSION=1.25
+FROM golang:${GO_VERSION}-alpine AS cpm-builder
+RUN apk add --no-cache git
+RUN git clone --depth 1 https://github.com/CognitiveOS-Project/cpm.git /cpm
+WORKDIR /cpm
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /usr/local/bin/cpm ./cmd/cpm
+
 FROM golang:${GO_VERSION}-alpine
 
 ARG WORKDIR=.
@@ -6,12 +12,12 @@ WORKDIR /src
 COPY ${WORKDIR} .
 
 RUN apk add --no-cache jq
-RUN go install github.com/CognitiveOS-Project/cpm/cmd/cpm@v1.0.9-alpha
-
+COPY --from=cpm-builder /usr/local/bin/cpm /usr/local/bin/cpm
 RUN mkdir -p /out
+
 RUN cpm pack --bin tools
-RUN cpm info --json > /out/pkg.json
+RUN PKG_NAME=$(jq -r '.name' cognitive.json) && cpm info "$PKG_NAME" --json --manifest cognitive.json > /out/pkg.json
 RUN cp *.cgp /out/
 
-FROM scratch
-COPY --from=0 /out /out
+FROM alpine
+COPY --from=1 /out /out
