@@ -1,0 +1,16 @@
+ARG GO_VERSION=1.25
+FROM golang:${GO_VERSION}-alpine
+
+ARG WORKDIR=.
+WORKDIR /src
+COPY ${WORKDIR} .
+
+RUN apk add --no-cache jq
+RUN go install github.com/CognitiveOS-Project/cpm/cmd/cpm@v1.0.9-alpha
+
+RUN cpm pack
+RUN cpm info --json > /out/pkg.json
+RUN cp *.cgp /out/
+
+FROM scratch
+COPY --from=0 /out /out

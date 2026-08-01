@@ -1,0 +1,31 @@
+{
+  "author": "jeanmachuca",
+  "checksum": {
+    "sha256": ""
+  },
+  "description": "Face recognition model weights (safetensors + gguf) converted from vladmandic/face-api, with a reproducible extraction/export/verification pipeline",
+  "hardware_requirements": {
+    "min_ram_mb": 1024,
+    "min_storage_mb": 200,
+    "npu_required": false
+  },
+  "license": "MIT",
+  "name": "face-recognition",
+  "runtime": {
+    "capabilities": [
+      "face.detection",
+      "face.recognition",
+      "face.landmarks",
+      "face.expression",
+      "face.age-gender"
+    ],
+    "mcp_servers": [],
+    "system_prompt": "prompts/system.md",
+    "tools_root": "tools"
+  },
+  "source": {
+    "issues": "https://github.com/CognitiveOS-Labs/face-recognition/issues",
+    "repository": "https://github.com/CognitiveOS-Labs/face-recognition"
+  },
+  "version": "0.1.0"
+}
