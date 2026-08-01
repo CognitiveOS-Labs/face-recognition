@@ -33,6 +33,42 @@ downloads the GGUF at install time and the daemon registers the model for
 `wide_model_load`. The recognition backbone is pretrained (VGGFace2); learning
 **who is who** happens through enrollment (embedding gallery), not retraining.
 
+## cpm implementation notes (findings)
+
+Findings from building this package against the current `cpm` implementation
+(`cpm@v1.0.9-alpha`, built from `CognitiveOS-Project/cpm`) and the draft specs
+(`manifest-fields.md`, `cgp-format.md`, `ai-model-publisher.md`). The spec docs
+and the implementation are not always in sync — the implementation wins for
+what `cpm pack` accepts.
+
+- **`brain.wide_model.routing`** — the spec (`manifest-fields.md`) defines an
+  object `{ model_id, tags }`; the cpm Go struct defines an **array** of
+  `{ capability, priority }`. Divergent semantics, so `routing` is **omitted**
+  from this manifest. The daemon's model-registry wiring described in
+  `raw-model.md` (§Multi-Model Routing) is deferred until the shapes align.
+- **`dependencies`** — cpm's schema validator **rejects the field for any
+  value** (`ERROR:V006 ... invalid jsonType map[string]string`), including an
+  empty `{}`. It is therefore omitted; package relationships are documented in
+  the READMEs. Re-add when cpm's validator accepts the field.
+- **`brain.training`** — used by `face-recognition-tune`; documented in the
+  `cpm-tune.md` tutorial but **not present in either schema** (local mirror or
+  cpm's bundled one). It passes because unknown properties are allowed, but it
+  is not schema-validated.
+- **Remote weights at pack time** — `cpm pack` resolves `weights.remote`
+  entries to an **optional local file `weights/<filename>`**; a missing file
+  prints `Warning: referenced file ... not found, skipping` and the archive is
+  built without weights. That is correct for remote-only weights (downloaded
+  by the daemon at install from `CognitiveOS/vision`).
+- **Tools exec bit** — plain `cpm pack` stores `tools/` files at `0644`.
+  Use **`cpm pack --bin tools`** so archive tools keep `0755` (the MCP servers
+  in this repo are shebang scripts that must be executable).
+- **HF model card** — use a **generic card** (`library_name: gguf`, tags like
+  `face-recognition`, `face-detection`, `vision`) for `CognitiveOS/vision`,
+  **not** the Diffusion/LoRA template (that metadata describes diffusers LoRA
+  adapters with `lora_*` keys; these are full CNNs). The GGUF uses a generic
+  `general.architecture`, so llama.cpp cannot load it yet — that is the
+  architecture-reconstruction follow-up.
+
 
 ## Input models
 
